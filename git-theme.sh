@@ -413,6 +413,10 @@ _gt_build_vscode_json() {
 
   cat <<ENDJSON
 {
+  "editor.background": "#${_GT_P_bg}",
+  "editor.foreground": "#${_GT_P_fg}",
+  "editorLineNumber.foreground": "#${_GT_P_br_black}",
+  "editorLineNumber.activeForeground": "#${_GT_P_fg}",
   "titleBar.activeBackground": "#${_bg_dark}",
   "titleBar.activeForeground": "#${_GT_P_fg}",
   "titleBar.inactiveBackground": "#${_bg_dark}",
