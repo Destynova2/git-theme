@@ -333,6 +333,29 @@ _gt_send_osc_sequences() {
   printf '\033]4;15;#%s\033\\' "$_GT_P_br_white"
 }
 
+# ─── iTerm2 adapter ──────────────────────────────────────────────────
+
+_gt_apply_iterm2() {
+  printf '\033]1337;SetColors=bg=%s\007' "$_GT_P_bg"
+  printf '\033]1337;SetColors=fg=%s\007' "$_GT_P_fg"
+  printf '\033]1337;SetColors=black=%s\007' "$_GT_P_black"
+  printf '\033]1337;SetColors=red=%s\007' "$_GT_P_red"
+  printf '\033]1337;SetColors=green=%s\007' "$_GT_P_green"
+  printf '\033]1337;SetColors=yellow=%s\007' "$_GT_P_yellow"
+  printf '\033]1337;SetColors=blue=%s\007' "$_GT_P_blue"
+  printf '\033]1337;SetColors=magenta=%s\007' "$_GT_P_magenta"
+  printf '\033]1337;SetColors=cyan=%s\007' "$_GT_P_cyan"
+  printf '\033]1337;SetColors=white=%s\007' "$_GT_P_white"
+  printf '\033]1337;SetColors=br_black=%s\007' "$_GT_P_br_black"
+  printf '\033]1337;SetColors=br_red=%s\007' "$_GT_P_br_red"
+  printf '\033]1337;SetColors=br_green=%s\007' "$_GT_P_br_green"
+  printf '\033]1337;SetColors=br_yellow=%s\007' "$_GT_P_br_yellow"
+  printf '\033]1337;SetColors=br_blue=%s\007' "$_GT_P_br_blue"
+  printf '\033]1337;SetColors=br_magenta=%s\007' "$_GT_P_br_magenta"
+  printf '\033]1337;SetColors=br_cyan=%s\007' "$_GT_P_br_cyan"
+  printf '\033]1337;SetColors=br_white=%s\007' "$_GT_P_br_white"
+}
+
 # ─── Alacritty adapter ──────────────────────────────────────────────
 
 _gt_apply_alacritty() {
@@ -474,6 +497,10 @@ _gt_detect_terminal() {
   if [ -n "${WEZTERM_EXECUTABLE-}" ]; then
     printf 'osc'; return
   fi
+  # iTerm2
+  if [ "${TERM_PROGRAM-}" = "iTerm.app" ] || [ -n "${ITERM_SESSION_ID-}" ]; then
+    printf 'iterm2'; return
+  fi
   if [ -n "${KONSOLE_DBUS_SESSION-}" ] || [ -n "${KONSOLE_VERSION-}" ]; then
     printf 'konsole'; return
   fi
@@ -488,6 +515,7 @@ _gt_detect_terminal() {
 
 _gt_apply_terminal() {
   case "$(_gt_detect_terminal)" in
+    iterm2)    _gt_apply_iterm2 ;;
     konsole)   _gt_apply_konsole ;;
     kitty)     _gt_apply_kitty ;;
     alacritty) _gt_apply_alacritty; _gt_send_osc_sequences ;;
