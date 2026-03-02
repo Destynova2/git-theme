@@ -1,13 +1,10 @@
-#!/usr/bin/env bash
+#!/bin/sh
 # git-theme — Auto-assign terminal + VS Code color palettes per Git repo
-# Syncs mapping via ${XDG_DATA_HOME}/git-theme/map (plain text, git-friendly)
-#
-# Supported: Konsole (native), Alacritty, Kitty, Ptyxis, foot, wezterm, + OSC fallback
-# VS Code: auto-updates .vscode/settings.json (excluded from git)
-# Source this file in your .bashrc / .zshrc
+# Compatible with: sh, dash, bash, zsh, ksh
+# Source this file in your .bashrc / .zshrc / .profile
 
 # Guard against double-sourcing
-[[ -n "${_GT_LOADED-}" ]] && return 0
+[ -n "${_GT_LOADED-}" ] && return 0
 _GT_LOADED=1
 
 # ─── Paths (XDG-compliant) ──────────────────────────────────────────
@@ -16,169 +13,200 @@ GIT_THEME_MAP="$GIT_THEME_DIR/map"
 GIT_THEME_CURRENT=""
 
 # ─── Palettes ────────────────────────────────────────────────────────
-# Low-fatigue palettes for long coding sessions.
 # Format: name|bg|fg|black|red|green|yellow|blue|magenta|cyan|white
-#          |bright_black|bright_red|bright_green|bright_yellow|bright_blue|bright_magenta|bright_cyan|bright_white
+#          |br_black|br_red|br_green|br_yellow|br_blue|br_magenta|br_cyan|br_white
+GIT_THEME_PALETTES="mocha|1e1e2e|cdd6f4|45475a|f38ba8|a6e3a1|f9e2af|89b4fa|cba6f7|94e2d5|bac2de|585b70|f38ba8|a6e3a1|f9e2af|89b4fa|cba6f7|94e2d5|a6adc8
+macchiato|24273a|cad3f5|494d64|ed8796|a6da95|eed49f|8aadf4|c6a0f6|8bd5ca|b8c0e0|5b6078|ed8796|a6da95|eed49f|8aadf4|c6a0f6|8bd5ca|a5adcb
+frappe|303446|c6d0f5|51576d|e78284|a6d189|e5c890|8caaee|ca9ee6|81c8be|b5bfe2|626880|e78284|a6d189|e5c890|8caaee|ca9ee6|81c8be|a5adce
+rosepine|191724|e0def4|26233a|eb6f92|31748f|f6c177|9ccfd8|c4a7e7|ebbcba|e0def4|6e6a86|eb6f92|31748f|f6c177|9ccfd8|c4a7e7|ebbcba|e0def4
+rosepine-moon|232136|e0def4|2a273f|eb6f92|3e8fb0|f6c177|9ccfd8|c4a7e7|ea9a97|e0def4|6e6a86|eb6f92|3e8fb0|f6c177|9ccfd8|c4a7e7|ea9a97|e0def4
+tokyonight|1a1b26|c0caf5|414868|f7768e|9ece6a|e0af68|7aa2f7|bb9af7|7dcfff|a9b1d6|565f89|ff7a93|b9f27c|ff9e64|7da6ff|bb9af7|0db9d7|c0caf5
+kanagawa|1f1f28|dcd7ba|2a2a37|c34043|76946a|c0a36e|7e9cd8|957fb8|6a9589|c8c093|625e5a|e82424|98bb6c|e6c384|7fb4ca|a292a3|7aa89f|d5cea3
+gruvbox|282828|ebdbb2|3c3836|cc241d|98971a|d79921|458588|b16286|689d6a|a89984|504945|fb4934|b8bb26|fabd2f|83a598|d3869b|8ec07c|bdae93
+everforest|2d353b|d3c6aa|475258|e67e80|a7c080|dbbc7f|7fbbb3|d699b6|83c092|9da9a0|374145|e67e80|a7c080|dbbc7f|7fbbb3|d699b6|83c092|bdc3af
+nord|2e3440|eceff4|3b4252|bf616a|a3be8c|ebcb8b|81a1c1|b48ead|88c0d0|e5e9f0|4c566a|bf616a|a3be8c|ebcb8b|81a1c1|b48ead|8fbcbb|eceff4
+dracula|282a36|f8f8f2|44475a|ff5555|50fa7b|f1fa8c|6272a4|bd93f9|8be9fd|f8f8f2|6272a4|ff6e6e|69ff94|ffffa5|d6acff|ff92df|a4ffff|ffffff
+solarized|002b36|839496|073642|dc322f|859900|b58900|268bd2|6c71c4|2aa198|93a1a1|586e75|cb4b16|859900|b58900|268bd2|6c71c4|2aa198|eee8d5"
 
-declare -a GIT_THEME_PALETTES=(
-  "mocha|1e1e2e|cdd6f4|45475a|f38ba8|a6e3a1|f9e2af|89b4fa|cba6f7|94e2d5|bac2de|585b70|f38ba8|a6e3a1|f9e2af|89b4fa|cba6f7|94e2d5|a6adc8"
-  "macchiato|24273a|cad3f5|494d64|ed8796|a6da95|eed49f|8aadf4|c6a0f6|8bd5ca|b8c0e0|5b6078|ed8796|a6da95|eed49f|8aadf4|c6a0f6|8bd5ca|a5adcb"
-  "frappe|303446|c6d0f5|51576d|e78284|a6d189|e5c890|8caaee|ca9ee6|81c8be|b5bfe2|626880|e78284|a6d189|e5c890|8caaee|ca9ee6|81c8be|a5adce"
-  "rosepine|191724|e0def4|26233a|eb6f92|31748f|f6c177|9ccfd8|c4a7e7|ebbcba|e0def4|6e6a86|eb6f92|31748f|f6c177|9ccfd8|c4a7e7|ebbcba|e0def4"
-  "rosepine-moon|232136|e0def4|2a273f|eb6f92|3e8fb0|f6c177|9ccfd8|c4a7e7|ea9a97|e0def4|6e6a86|eb6f92|3e8fb0|f6c177|9ccfd8|c4a7e7|ea9a97|e0def4"
-  "tokyonight|1a1b26|c0caf5|414868|f7768e|9ece6a|e0af68|7aa2f7|bb9af7|7dcfff|a9b1d6|565f89|ff7a93|b9f27c|ff9e64|7da6ff|bb9af7|0db9d7|c0caf5"
-  "kanagawa|1f1f28|dcd7ba|2a2a37|c34043|76946a|c0a36e|7e9cd8|957fb8|6a9589|c8c093|625e5a|e82424|98bb6c|e6c384|7fb4ca|a292a3|7aa89f|d5cea3"
-  "gruvbox|282828|ebdbb2|3c3836|cc241d|98971a|d79921|458588|b16286|689d6a|a89984|504945|fb4934|b8bb26|fabd2f|83a598|d3869b|8ec07c|bdae93"
-  "everforest|2d353b|d3c6aa|475258|e67e80|a7c080|dbbc7f|7fbbb3|d699b6|83c092|9da9a0|374145|e67e80|a7c080|dbbc7f|7fbbb3|d699b6|83c092|bdc3af"
-  "nord|2e3440|eceff4|3b4252|bf616a|a3be8c|ebcb8b|81a1c1|b48ead|88c0d0|e5e9f0|4c566a|bf616a|a3be8c|ebcb8b|81a1c1|b48ead|8fbcbb|eceff4"
-  "dracula|282a36|f8f8f2|44475a|ff5555|50fa7b|f1fa8c|6272a4|bd93f9|8be9fd|f8f8f2|6272a4|ff6e6e|69ff94|ffffa5|d6acff|ff92df|a4ffff|ffffff"
-  "solarized|002b36|839496|073642|dc322f|859900|b58900|268bd2|6c71c4|2aa198|93a1a1|586e75|cb4b16|859900|b58900|268bd2|6c71c4|2aa198|eee8d5"
-)
+PALETTE_COUNT=12
 
-PALETTE_COUNT=${#GIT_THEME_PALETTES[@]}
+# ─── Parsed palette fields (set by _gt_parse_palette) ────────────────
+_GT_P_name="" _GT_P_bg="" _GT_P_fg=""
+_GT_P_black="" _GT_P_red="" _GT_P_green="" _GT_P_yellow=""
+_GT_P_blue="" _GT_P_magenta="" _GT_P_cyan="" _GT_P_white=""
+_GT_P_br_black="" _GT_P_br_red="" _GT_P_br_green="" _GT_P_br_yellow=""
+_GT_P_br_blue="" _GT_P_br_magenta="" _GT_P_br_cyan="" _GT_P_br_white=""
 
-# ─── Palette field names (parse once, use everywhere) ────────────────
-declare -a _GT_FIELDS=(
-  name bg fg black red green yellow blue magenta cyan white
-  br_black br_red br_green br_yellow br_blue br_magenta br_cyan br_white
-)
-readonly _GT_FIELD_COUNT=${#_GT_FIELDS[@]}
+# ─── Palette parsing ─────────────────────────────────────────────────
 
-# Parse palette string into associative array _GT_P[fieldname]=value
-declare -A _GT_P
 _gt_parse_palette() {
-  _GT_P=()
-  local IFS='|'
-  local -a values
-  read -ra values <<< "$1"
+  local _old_ifs="$IFS"
+  IFS='|'
+  # Intentional word-splitting on IFS; palette data contains no globs
+  set -f
+  # zsh doesn't word-split by default; enable it for this function only
+  if [ -n "${ZSH_VERSION-}" ]; then
+    setopt localoptions shwordsplit
+  fi
+  # shellcheck disable=SC2086
+  set -- $1
+  set +f
+  IFS="$_old_ifs"
 
-  if (( ${#values[@]} != _GT_FIELD_COUNT )); then
-    echo "[git-theme] ERROR: palette has ${#values[@]} fields, expected ${_GT_FIELD_COUNT}" >&2
+  if [ $# -ne 19 ]; then
+    printf '[git-theme] ERROR: palette has %d fields, expected 19\n' "$#" >&2
     return 1
   fi
 
-  local i
-  for ((i = 0; i < _GT_FIELD_COUNT; i++)); do
-    _GT_P[${_GT_FIELDS[$i]}]="${values[$i]}"
-  done
+  _GT_P_name="$1"; _GT_P_bg="$2"; _GT_P_fg="$3"
+  _GT_P_black="$4"; _GT_P_red="$5"; _GT_P_green="$6"; _GT_P_yellow="$7"
+  _GT_P_blue="$8"; _GT_P_magenta="$9"
+  shift 9
+  _GT_P_cyan="$1"; _GT_P_white="$2"
+  _GT_P_br_black="$3"; _GT_P_br_red="$4"; _GT_P_br_green="$5"; _GT_P_br_yellow="$6"
+  _GT_P_br_blue="$7"; _GT_P_br_magenta="$8"; _GT_P_br_cyan="$9"
+  shift 9
+  _GT_P_br_white="$1"
+}
+
+# ─── Hex utilities ───────────────────────────────────────────────────
+
+_gt_hex2rgb() {
+  local _rr _gg _bb
+  _rr=$(printf '%s' "$1" | cut -c1-2)
+  _gg=$(printf '%s' "$1" | cut -c3-4)
+  _bb=$(printf '%s' "$1" | cut -c5-6)
+  printf '%d,%d,%d' "0x$_rr" "0x$_gg" "0x$_bb"
+}
+
+_gt_lighten_hex() {
+  local _hex="$1" _factor="${2:-15}" _rr _gg _bb _r _g _b
+  _rr=$(printf '%s' "$_hex" | cut -c1-2)
+  _gg=$(printf '%s' "$_hex" | cut -c3-4)
+  _bb=$(printf '%s' "$_hex" | cut -c5-6)
+  _r=$(printf '%d' "0x$_rr")
+  _g=$(printf '%d' "0x$_gg")
+  _b=$(printf '%d' "0x$_bb")
+  _r=$(( _r + (255 - _r) * _factor / 100 ))
+  _g=$(( _g + (255 - _g) * _factor / 100 ))
+  _b=$(( _b + (255 - _b) * _factor / 100 ))
+  printf '%02x%02x%02x' "$_r" "$_g" "$_b"
+}
+
+_gt_darken_hex() {
+  local _hex="$1" _factor="${2:-15}" _rr _gg _bb _r _g _b
+  _rr=$(printf '%s' "$_hex" | cut -c1-2)
+  _gg=$(printf '%s' "$_hex" | cut -c3-4)
+  _bb=$(printf '%s' "$_hex" | cut -c5-6)
+  _r=$(printf '%d' "0x$_rr")
+  _g=$(printf '%d' "0x$_gg")
+  _b=$(printf '%d' "0x$_bb")
+  _r=$(( _r * (100 - _factor) / 100 ))
+  _g=$(( _g * (100 - _factor) / 100 ))
+  _b=$(( _b * (100 - _factor) / 100 ))
+  printf '%02x%02x%02x' "$_r" "$_g" "$_b"
 }
 
 # ─── Core functions ──────────────────────────────────────────────────
 
 _gt_ensure_dir() {
-  [[ -d "$GIT_THEME_DIR" ]] || mkdir -p "$GIT_THEME_DIR"
-  [[ -f "$GIT_THEME_MAP" ]] || touch "$GIT_THEME_MAP"
+  [ -d "$GIT_THEME_DIR" ] || mkdir -p "$GIT_THEME_DIR"
+  [ -f "$GIT_THEME_MAP" ] || touch "$GIT_THEME_MAP"
 }
 
 _gt_repo_id() {
-  local remote
-  remote=$(git -C "$1" config --get remote.origin.url 2>/dev/null)
-  if [[ -n "$remote" ]]; then
-    echo "$remote" | sed -E 's|.*[:/]([^/]+/[^/]+?)(\.git)?$|\1|'
+  local _remote
+  _remote=$(git -C "$1" config --get remote.origin.url 2>/dev/null)
+  if [ -n "$_remote" ]; then
+    # POSIX BRE: extract user/repo, then strip .git suffix
+    printf '%s\n' "$_remote" | sed 's|.*[:/]\([^/][^/]*/[^/][^/]*\)$|\1|; s|\.git$||'
   else
     basename "$1"
   fi
 }
 
 _gt_hash_to_index() {
-  local hash
-  hash=$(echo -n "$1" | md5sum | cut -c1-8)
-  echo $(( 16#$hash % PALETTE_COUNT ))
+  local _hash
+  if command -v md5sum >/dev/null 2>&1; then
+    _hash=$(printf '%s' "$1" | md5sum | cut -c1-7)
+  elif command -v md5 >/dev/null 2>&1; then
+    _hash=$(printf '%s' "$1" | md5 | cut -c1-7)
+  else
+    # Fallback: cksum
+    _hash=$(printf '%s' "$1" | cksum | cut -d' ' -f1)
+    echo $(( _hash % PALETTE_COUNT ))
+    return
+  fi
+  echo $(( 0x$_hash % PALETTE_COUNT ))
 }
 
-# Fix #4: awk for exact matching instead of grep (repo_id may contain regex chars)
 _gt_lookup() {
   awk -F'|' -v id="$1" '$1 == id { print $2; exit }' "$GIT_THEME_MAP" 2>/dev/null
 }
 
-# Fix #3: sed delimiter '#' to avoid collision with '|' field separator
 _gt_save() {
-  local repo_id="$1" theme="$2"
+  local _repo_id="$1" _theme="$2"
   _gt_ensure_dir
-  if awk -F'|' -v id="$repo_id" '$1 == id { found=1; exit } END { exit !found }' "$GIT_THEME_MAP" 2>/dev/null; then
-    sed -i "\#^${repo_id}|#d" "$GIT_THEME_MAP"
+  if awk -F'|' -v id="$_repo_id" '$1 == id { found=1; exit } END { exit !found }' "$GIT_THEME_MAP" 2>/dev/null; then
+    awk -F'|' -v id="$_repo_id" '$1 != id' "$GIT_THEME_MAP" > "${GIT_THEME_MAP}.tmp" && mv "${GIT_THEME_MAP}.tmp" "$GIT_THEME_MAP"
   fi
-  echo "${repo_id}|${theme}" >> "$GIT_THEME_MAP"
+  printf '%s|%s\n' "$_repo_id" "$_theme" >> "$GIT_THEME_MAP"
   sort -o "$GIT_THEME_MAP" "$GIT_THEME_MAP"
 }
 
 _gt_get_palette() {
-  for p in "${GIT_THEME_PALETTES[@]}"; do
-    if [[ "$p" == "${1}|"* ]]; then
-      echo "$p"
-      return 0
-    fi
-  done
+  local _line
+  _line=$(printf '%s\n' "$GIT_THEME_PALETTES" | grep "^${1}|" | head -n 1)
+  if [ -n "$_line" ]; then
+    printf '%s\n' "$_line"
+    return 0
+  fi
   return 1
-}
-
-# ─── Color utilities ────────────────────────────────────────────────
-
-_gt_hex2rgb() {
-  printf "%d,%d,%d" "0x${1:0:2}" "0x${1:2:2}" "0x${1:4:2}"
-}
-
-_gt_lighten_hex() {
-  local hex="$1" factor="${2:-15}"
-  local r=$((16#${hex:0:2})) g=$((16#${hex:2:2})) b=$((16#${hex:4:2}))
-  r=$(( r + (255 - r) * factor / 100 ))
-  g=$(( g + (255 - g) * factor / 100 ))
-  b=$(( b + (255 - b) * factor / 100 ))
-  printf "%02x%02x%02x" "$r" "$g" "$b"
-}
-
-_gt_darken_hex() {
-  local hex="$1" factor="${2:-15}"
-  local r=$((16#${hex:0:2})) g=$((16#${hex:2:2})) b=$((16#${hex:4:2}))
-  r=$(( r * (100 - factor) / 100 ))
-  g=$(( g * (100 - factor) / 100 ))
-  b=$(( b * (100 - factor) / 100 ))
-  printf "%02x%02x%02x" "$r" "$g" "$b"
 }
 
 # ─── JSON merge utility ─────────────────────────────────────────────
 
 _gt_json_merge_key() {
-  local file="$1" key="$2" value_json="$3"
+  local _file="$1" _key="$2" _value_json="$3"
 
-  if command -v jq &>/dev/null; then
-    if [[ -f "$file" ]]; then
-      local existing
-      existing=$(cat "$file")
-      echo "$existing" | jq --arg k "$key" --argjson v "$value_json" '.[$k] = $v' > "$file"
+  if command -v jq >/dev/null 2>&1; then
+    if [ -f "$_file" ]; then
+      local _existing
+      _existing=$(cat "$_file")
+      printf '%s' "$_existing" | jq --arg k "$_key" --argjson v "$_value_json" '.[$k] = $v' > "$_file"
     else
-      jq -n --arg k "$key" --argjson v "$value_json" '{($k): $v}' > "$file"
+      jq -n --arg k "$_key" --argjson v "$_value_json" '{($k): $v}' > "$_file"
     fi
     return
   fi
 
-  if command -v python3 &>/dev/null && [[ -f "$file" ]]; then
+  if command -v python3 >/dev/null 2>&1 && [ -f "$_file" ]; then
     python3 -c "
 import json
-with open('$file') as f: data = json.load(f)
-data['$key'] = json.loads('''$value_json''')
-with open('$file', 'w') as f: json.dump(data, f, indent=2)
+with open('$_file') as f: data = json.load(f)
+data['$_key'] = json.loads('''$_value_json''')
+with open('$_file', 'w') as f: json.dump(data, f, indent=2)
 " 2>/dev/null
     return
   fi
 
-  echo "{\"${key}\": ${value_json}}" > "$file"
+  printf '{"%s": %s}\n' "$_key" "$_value_json" > "$_file"
 }
 
 _gt_json_remove_key() {
-  local file="$1" key="$2"
-  [[ -f "$file" ]] || return 0
+  local _file="$1" _key="$2"
+  [ -f "$_file" ] || return 0
 
-  if command -v jq &>/dev/null; then
-    local tmp
-    tmp=$(jq --arg k "$key" 'del(.[$k])' "$file")
-    echo "$tmp" > "$file"
-  elif command -v python3 &>/dev/null; then
+  if command -v jq >/dev/null 2>&1; then
+    local _tmp
+    _tmp=$(jq --arg k "$_key" 'del(.[$k])' "$_file")
+    printf '%s\n' "$_tmp" > "$_file"
+  elif command -v python3 >/dev/null 2>&1; then
     python3 -c "
 import json
-with open('$file') as f: data = json.load(f)
-data.pop('$key', None)
-with open('$file', 'w') as f: json.dump(data, f, indent=2)
+with open('$_file') as f: data = json.load(f)
+data.pop('$_key', None)
+with open('$_file', 'w') as f: json.dump(data, f, indent=2)
 " 2>/dev/null
   fi
 }
@@ -186,91 +214,91 @@ with open('$file', 'w') as f: json.dump(data, f, indent=2)
 # ─── Konsole adapter ────────────────────────────────────────────────
 
 _gt_write_konsole_colorscheme() {
-  local scheme_dir="$HOME/.local/share/konsole"
-  mkdir -p "$scheme_dir"
-  local scheme_file="$scheme_dir/git-theme-active.colorscheme"
+  local _scheme_dir="$HOME/.local/share/konsole"
+  mkdir -p "$_scheme_dir"
+  local _scheme_file="$_scheme_dir/git-theme-active.colorscheme"
 
-  cat > "$scheme_file" << EOF
+  cat > "$_scheme_file" <<EOF
 [General]
-Description=git-theme (${_GT_P[name]})
+Description=git-theme ($_GT_P_name)
 Opacity=1
 Wallpaper=
 
 [Background]
-Color=$(_gt_hex2rgb "${_GT_P[bg]}")
+Color=$(_gt_hex2rgb "$_GT_P_bg")
 [BackgroundIntense]
-Color=$(_gt_hex2rgb "${_GT_P[bg]}")
+Color=$(_gt_hex2rgb "$_GT_P_bg")
 [BackgroundFaint]
-Color=$(_gt_hex2rgb "${_GT_P[bg]}")
+Color=$(_gt_hex2rgb "$_GT_P_bg")
 
 [Foreground]
-Color=$(_gt_hex2rgb "${_GT_P[fg]}")
+Color=$(_gt_hex2rgb "$_GT_P_fg")
 [ForegroundIntense]
-Color=$(_gt_hex2rgb "${_GT_P[br_white]}")
+Color=$(_gt_hex2rgb "$_GT_P_br_white")
 Bold=true
 [ForegroundFaint]
-Color=$(_gt_hex2rgb "${_GT_P[br_black]}")
+Color=$(_gt_hex2rgb "$_GT_P_br_black")
 
 [Color0]
-Color=$(_gt_hex2rgb "${_GT_P[black]}")
+Color=$(_gt_hex2rgb "$_GT_P_black")
 [Color0Intense]
-Color=$(_gt_hex2rgb "${_GT_P[br_black]}")
+Color=$(_gt_hex2rgb "$_GT_P_br_black")
 [Color0Faint]
-Color=$(_gt_hex2rgb "${_GT_P[black]}")
+Color=$(_gt_hex2rgb "$_GT_P_black")
 
 [Color1]
-Color=$(_gt_hex2rgb "${_GT_P[red]}")
+Color=$(_gt_hex2rgb "$_GT_P_red")
 [Color1Intense]
-Color=$(_gt_hex2rgb "${_GT_P[br_red]}")
+Color=$(_gt_hex2rgb "$_GT_P_br_red")
 [Color1Faint]
-Color=$(_gt_hex2rgb "${_GT_P[red]}")
+Color=$(_gt_hex2rgb "$_GT_P_red")
 
 [Color2]
-Color=$(_gt_hex2rgb "${_GT_P[green]}")
+Color=$(_gt_hex2rgb "$_GT_P_green")
 [Color2Intense]
-Color=$(_gt_hex2rgb "${_GT_P[br_green]}")
+Color=$(_gt_hex2rgb "$_GT_P_br_green")
 [Color2Faint]
-Color=$(_gt_hex2rgb "${_GT_P[green]}")
+Color=$(_gt_hex2rgb "$_GT_P_green")
 
 [Color3]
-Color=$(_gt_hex2rgb "${_GT_P[yellow]}")
+Color=$(_gt_hex2rgb "$_GT_P_yellow")
 [Color3Intense]
-Color=$(_gt_hex2rgb "${_GT_P[br_yellow]}")
+Color=$(_gt_hex2rgb "$_GT_P_br_yellow")
 [Color3Faint]
-Color=$(_gt_hex2rgb "${_GT_P[yellow]}")
+Color=$(_gt_hex2rgb "$_GT_P_yellow")
 
 [Color4]
-Color=$(_gt_hex2rgb "${_GT_P[blue]}")
+Color=$(_gt_hex2rgb "$_GT_P_blue")
 [Color4Intense]
-Color=$(_gt_hex2rgb "${_GT_P[br_blue]}")
+Color=$(_gt_hex2rgb "$_GT_P_br_blue")
 [Color4Faint]
-Color=$(_gt_hex2rgb "${_GT_P[blue]}")
+Color=$(_gt_hex2rgb "$_GT_P_blue")
 
 [Color5]
-Color=$(_gt_hex2rgb "${_GT_P[magenta]}")
+Color=$(_gt_hex2rgb "$_GT_P_magenta")
 [Color5Intense]
-Color=$(_gt_hex2rgb "${_GT_P[br_magenta]}")
+Color=$(_gt_hex2rgb "$_GT_P_br_magenta")
 [Color5Faint]
-Color=$(_gt_hex2rgb "${_GT_P[magenta]}")
+Color=$(_gt_hex2rgb "$_GT_P_magenta")
 
 [Color6]
-Color=$(_gt_hex2rgb "${_GT_P[cyan]}")
+Color=$(_gt_hex2rgb "$_GT_P_cyan")
 [Color6Intense]
-Color=$(_gt_hex2rgb "${_GT_P[br_cyan]}")
+Color=$(_gt_hex2rgb "$_GT_P_br_cyan")
 [Color6Faint]
-Color=$(_gt_hex2rgb "${_GT_P[cyan]}")
+Color=$(_gt_hex2rgb "$_GT_P_cyan")
 
 [Color7]
-Color=$(_gt_hex2rgb "${_GT_P[white]}")
+Color=$(_gt_hex2rgb "$_GT_P_white")
 [Color7Intense]
-Color=$(_gt_hex2rgb "${_GT_P[br_white]}")
+Color=$(_gt_hex2rgb "$_GT_P_br_white")
 [Color7Faint]
-Color=$(_gt_hex2rgb "${_GT_P[white]}")
+Color=$(_gt_hex2rgb "$_GT_P_white")
 EOF
 }
 
 _gt_reload_konsole() {
-  if command -v qdbus &>/dev/null && [[ -n "$KONSOLE_DBUS_SESSION" ]]; then
+  if command -v qdbus >/dev/null 2>&1 && [ -n "$KONSOLE_DBUS_SESSION" ]; then
     qdbus "$KONSOLE_DBUS_SERVICE" "$KONSOLE_DBUS_SESSION" \
       org.kde.konsole.Session.setProfile "git-theme-active" 2>/dev/null
   fi
@@ -285,62 +313,68 @@ _gt_apply_konsole() {
 # ─── OSC escape sequences (universal fallback) ──────────────────────
 
 _gt_send_osc_sequences() {
-  printf '\033]11;#%s\033\\' "${_GT_P[bg]}"
-  printf '\033]10;#%s\033\\' "${_GT_P[fg]}"
-
-  local -a ansi_order=(
-    black red green yellow blue magenta cyan white
-    br_black br_red br_green br_yellow br_blue br_magenta br_cyan br_white
-  )
-  local i=0
-  for field in "${ansi_order[@]}"; do
-    printf '\033]4;%d;#%s\033\\' "$i" "${_GT_P[$field]}"
-    ((i++))
-  done
+  printf '\033]11;#%s\033\\' "$_GT_P_bg"
+  printf '\033]10;#%s\033\\' "$_GT_P_fg"
+  printf '\033]4;0;#%s\033\\' "$_GT_P_black"
+  printf '\033]4;1;#%s\033\\' "$_GT_P_red"
+  printf '\033]4;2;#%s\033\\' "$_GT_P_green"
+  printf '\033]4;3;#%s\033\\' "$_GT_P_yellow"
+  printf '\033]4;4;#%s\033\\' "$_GT_P_blue"
+  printf '\033]4;5;#%s\033\\' "$_GT_P_magenta"
+  printf '\033]4;6;#%s\033\\' "$_GT_P_cyan"
+  printf '\033]4;7;#%s\033\\' "$_GT_P_white"
+  printf '\033]4;8;#%s\033\\' "$_GT_P_br_black"
+  printf '\033]4;9;#%s\033\\' "$_GT_P_br_red"
+  printf '\033]4;10;#%s\033\\' "$_GT_P_br_green"
+  printf '\033]4;11;#%s\033\\' "$_GT_P_br_yellow"
+  printf '\033]4;12;#%s\033\\' "$_GT_P_br_blue"
+  printf '\033]4;13;#%s\033\\' "$_GT_P_br_magenta"
+  printf '\033]4;14;#%s\033\\' "$_GT_P_br_cyan"
+  printf '\033]4;15;#%s\033\\' "$_GT_P_br_white"
 }
 
 # ─── Alacritty adapter ──────────────────────────────────────────────
 
 _gt_apply_alacritty() {
-  local conf_dir="${XDG_CONFIG_HOME:-$HOME/.config}/alacritty"
-  mkdir -p "$conf_dir"
+  local _conf_dir="${XDG_CONFIG_HOME:-$HOME/.config}/alacritty"
+  mkdir -p "$_conf_dir"
 
-  cat > "$conf_dir/git-theme-colors.toml" << EOF
-# Auto-generated by git-theme — palette: ${_GT_P[name]}
+  cat > "$_conf_dir/git-theme-colors.toml" <<EOF
+# Auto-generated by git-theme — palette: $_GT_P_name
 [colors.primary]
-background = "0x${_GT_P[bg]}"
-foreground = "0x${_GT_P[fg]}"
+background = "0x$_GT_P_bg"
+foreground = "0x$_GT_P_fg"
 [colors.normal]
-black = "0x${_GT_P[black]}"
-red = "0x${_GT_P[red]}"
-green = "0x${_GT_P[green]}"
-yellow = "0x${_GT_P[yellow]}"
-blue = "0x${_GT_P[blue]}"
-magenta = "0x${_GT_P[magenta]}"
-cyan = "0x${_GT_P[cyan]}"
-white = "0x${_GT_P[white]}"
+black = "0x$_GT_P_black"
+red = "0x$_GT_P_red"
+green = "0x$_GT_P_green"
+yellow = "0x$_GT_P_yellow"
+blue = "0x$_GT_P_blue"
+magenta = "0x$_GT_P_magenta"
+cyan = "0x$_GT_P_cyan"
+white = "0x$_GT_P_white"
 [colors.bright]
-black = "0x${_GT_P[br_black]}"
-red = "0x${_GT_P[br_red]}"
-green = "0x${_GT_P[br_green]}"
-yellow = "0x${_GT_P[br_yellow]}"
-blue = "0x${_GT_P[br_blue]}"
-magenta = "0x${_GT_P[br_magenta]}"
-cyan = "0x${_GT_P[br_cyan]}"
-white = "0x${_GT_P[br_white]}"
+black = "0x$_GT_P_br_black"
+red = "0x$_GT_P_br_red"
+green = "0x$_GT_P_br_green"
+yellow = "0x$_GT_P_br_yellow"
+blue = "0x$_GT_P_br_blue"
+magenta = "0x$_GT_P_br_magenta"
+cyan = "0x$_GT_P_br_cyan"
+white = "0x$_GT_P_br_white"
 EOF
 }
 
 # ─── Kitty adapter ──────────────────────────────────────────────────
 
 _gt_apply_kitty() {
-  if command -v kitty &>/dev/null && [[ "$TERM" == "xterm-kitty" ]]; then
+  if command -v kitty >/dev/null 2>&1 && [ "$TERM" = "xterm-kitty" ]; then
     kitty @ set-colors \
-      background="#${_GT_P[bg]}" foreground="#${_GT_P[fg]}" \
-      color0="#${_GT_P[black]}" color1="#${_GT_P[red]}" color2="#${_GT_P[green]}" color3="#${_GT_P[yellow]}" \
-      color4="#${_GT_P[blue]}" color5="#${_GT_P[magenta]}" color6="#${_GT_P[cyan]}" color7="#${_GT_P[white]}" \
-      color8="#${_GT_P[br_black]}" color9="#${_GT_P[br_red]}" color10="#${_GT_P[br_green]}" color11="#${_GT_P[br_yellow]}" \
-      color12="#${_GT_P[br_blue]}" color13="#${_GT_P[br_magenta]}" color14="#${_GT_P[br_cyan]}" color15="#${_GT_P[br_white]}" \
+      background="#$_GT_P_bg" foreground="#$_GT_P_fg" \
+      color0="#$_GT_P_black" color1="#$_GT_P_red" color2="#$_GT_P_green" color3="#$_GT_P_yellow" \
+      color4="#$_GT_P_blue" color5="#$_GT_P_magenta" color6="#$_GT_P_cyan" color7="#$_GT_P_white" \
+      color8="#$_GT_P_br_black" color9="#$_GT_P_br_red" color10="#$_GT_P_br_green" color11="#$_GT_P_br_yellow" \
+      color12="#$_GT_P_br_blue" color13="#$_GT_P_br_magenta" color14="#$_GT_P_br_cyan" color15="#$_GT_P_br_white" \
       2>/dev/null
   fi
 }
@@ -348,115 +382,108 @@ _gt_apply_kitty() {
 # ─── VS Code adapter ────────────────────────────────────────────────
 
 _gt_build_vscode_json() {
-  local bg_light=$(_gt_lighten_hex "${_GT_P[bg]}" 8)
-  local bg_lighter=$(_gt_lighten_hex "${_GT_P[bg]}" 15)
-  local bg_dark=$(_gt_darken_hex "${_GT_P[bg]}" 10)
-  local accent="${_GT_P[blue]}"
+  local _bg_light _bg_lighter _bg_dark _accent
+  _bg_light=$(_gt_lighten_hex "$_GT_P_bg" 8)
+  _bg_lighter=$(_gt_lighten_hex "$_GT_P_bg" 15)
+  _bg_dark=$(_gt_darken_hex "$_GT_P_bg" 10)
+  _accent="$_GT_P_blue"
 
-  cat << ENDJSON
+  cat <<ENDJSON
 {
-  "titleBar.activeBackground": "#${bg_dark}",
-  "titleBar.activeForeground": "#${_GT_P[fg]}",
-  "titleBar.inactiveBackground": "#${bg_dark}",
-  "titleBar.inactiveForeground": "#${_GT_P[br_black]}",
-  "activityBar.background": "#${bg_dark}",
-  "activityBar.foreground": "#${_GT_P[fg]}",
-  "activityBar.activeBorder": "#${accent}",
-  "activityBarBadge.background": "#${accent}",
-  "statusBar.background": "#${bg_dark}",
-  "statusBar.foreground": "#${_GT_P[fg]}",
-  "statusBar.debuggingBackground": "#${_GT_P[red]}",
-  "statusBar.noFolderBackground": "#${bg_dark}",
-  "sideBar.background": "#${bg_light}",
-  "sideBar.foreground": "#${_GT_P[fg]}",
-  "sideBarSectionHeader.background": "#${bg_lighter}",
-  "tab.activeBackground": "#${_GT_P[bg]}",
-  "tab.inactiveBackground": "#${bg_light}",
-  "tab.activeBorderTop": "#${accent}",
-  "editorGroupHeader.tabsBackground": "#${bg_dark}",
-  "panel.background": "#${_GT_P[bg]}",
-  "panel.border": "#${bg_lighter}",
-  "terminal.background": "#${_GT_P[bg]}",
-  "terminal.foreground": "#${_GT_P[fg]}",
-  "terminal.ansiBlack": "#${_GT_P[black]}",
-  "terminal.ansiRed": "#${_GT_P[red]}",
-  "terminal.ansiGreen": "#${_GT_P[green]}",
-  "terminal.ansiYellow": "#${_GT_P[yellow]}",
-  "terminal.ansiBlue": "#${_GT_P[blue]}",
-  "terminal.ansiMagenta": "#${_GT_P[magenta]}",
-  "terminal.ansiCyan": "#${_GT_P[cyan]}",
-  "terminal.ansiWhite": "#${_GT_P[white]}",
-  "terminal.ansiBrightBlack": "#${_GT_P[br_black]}",
-  "terminal.ansiBrightRed": "#${_GT_P[br_red]}",
-  "terminal.ansiBrightGreen": "#${_GT_P[br_green]}",
-  "terminal.ansiBrightYellow": "#${_GT_P[br_yellow]}",
-  "terminal.ansiBrightBlue": "#${_GT_P[br_blue]}",
-  "terminal.ansiBrightMagenta": "#${_GT_P[br_magenta]}",
-  "terminal.ansiBrightCyan": "#${_GT_P[br_cyan]}",
-  "terminal.ansiBrightWhite": "#${_GT_P[br_white]}"
+  "titleBar.activeBackground": "#${_bg_dark}",
+  "titleBar.activeForeground": "#${_GT_P_fg}",
+  "titleBar.inactiveBackground": "#${_bg_dark}",
+  "titleBar.inactiveForeground": "#${_GT_P_br_black}",
+  "activityBar.background": "#${_bg_dark}",
+  "activityBar.foreground": "#${_GT_P_fg}",
+  "activityBar.activeBorder": "#${_accent}",
+  "activityBarBadge.background": "#${_accent}",
+  "statusBar.background": "#${_bg_dark}",
+  "statusBar.foreground": "#${_GT_P_fg}",
+  "statusBar.debuggingBackground": "#${_GT_P_red}",
+  "statusBar.noFolderBackground": "#${_bg_dark}",
+  "sideBar.background": "#${_bg_light}",
+  "sideBar.foreground": "#${_GT_P_fg}",
+  "sideBarSectionHeader.background": "#${_bg_lighter}",
+  "tab.activeBackground": "#${_GT_P_bg}",
+  "tab.inactiveBackground": "#${_bg_light}",
+  "tab.activeBorderTop": "#${_accent}",
+  "editorGroupHeader.tabsBackground": "#${_bg_dark}",
+  "panel.background": "#${_GT_P_bg}",
+  "panel.border": "#${_bg_lighter}",
+  "terminal.background": "#${_GT_P_bg}",
+  "terminal.foreground": "#${_GT_P_fg}",
+  "terminal.ansiBlack": "#${_GT_P_black}",
+  "terminal.ansiRed": "#${_GT_P_red}",
+  "terminal.ansiGreen": "#${_GT_P_green}",
+  "terminal.ansiYellow": "#${_GT_P_yellow}",
+  "terminal.ansiBlue": "#${_GT_P_blue}",
+  "terminal.ansiMagenta": "#${_GT_P_magenta}",
+  "terminal.ansiCyan": "#${_GT_P_cyan}",
+  "terminal.ansiWhite": "#${_GT_P_white}",
+  "terminal.ansiBrightBlack": "#${_GT_P_br_black}",
+  "terminal.ansiBrightRed": "#${_GT_P_br_red}",
+  "terminal.ansiBrightGreen": "#${_GT_P_br_green}",
+  "terminal.ansiBrightYellow": "#${_GT_P_br_yellow}",
+  "terminal.ansiBrightBlue": "#${_GT_P_br_blue}",
+  "terminal.ansiBrightMagenta": "#${_GT_P_br_magenta}",
+  "terminal.ansiBrightCyan": "#${_GT_P_br_cyan}",
+  "terminal.ansiBrightWhite": "#${_GT_P_br_white}"
 }
 ENDJSON
 }
 
 _gt_exclude_from_git() {
-  local exclude_file="$1/.git/info/exclude"
-  if [[ -f "$exclude_file" ]] && ! grep -qF ".vscode/settings.json" "$exclude_file" 2>/dev/null; then
-    echo ".vscode/settings.json" >> "$exclude_file"
+  local _exclude_file="$1/.git/info/exclude"
+  if [ -f "$_exclude_file" ] && ! grep -qF ".vscode/settings.json" "$_exclude_file" 2>/dev/null; then
+    printf '.vscode/settings.json\n' >> "$_exclude_file"
   fi
 }
 
 _gt_apply_vscode() {
-  local git_root="$1"
-  [[ -z "$git_root" ]] && return 0
+  local _git_root="$1"
+  [ -z "$_git_root" ] && return 0
 
-  local settings_file="$git_root/.vscode/settings.json"
-  mkdir -p "$git_root/.vscode"
+  local _settings_file="$_git_root/.vscode/settings.json"
+  mkdir -p "$_git_root/.vscode"
 
-  local color_json
-  color_json=$(_gt_build_vscode_json)
+  local _color_json
+  _color_json=$(_gt_build_vscode_json)
 
-  _gt_json_merge_key "$settings_file" "workbench.colorCustomizations" "$color_json"
-  _gt_exclude_from_git "$git_root"
+  _gt_json_merge_key "$_settings_file" "workbench.colorCustomizations" "$_color_json"
+  _gt_exclude_from_git "$_git_root"
 }
 
 _gt_clean_vscode() {
-  local git_root
-  git_root=$(git rev-parse --show-toplevel 2>/dev/null)
-  if [[ -n "$git_root" ]] && [[ -f "$git_root/.vscode/settings.json" ]]; then
-    _gt_json_remove_key "$git_root/.vscode/settings.json" "workbench.colorCustomizations"
+  local _git_root
+  _git_root=$(git rev-parse --show-toplevel 2>/dev/null)
+  if [ -n "$_git_root" ] && [ -f "$_git_root/.vscode/settings.json" ]; then
+    _gt_json_remove_key "$_git_root/.vscode/settings.json" "workbench.colorCustomizations"
   fi
 }
 
 # ─── Terminal detection and dispatch ─────────────────────────────────
-# Fix #5: detect Ptyxis, foot, wezterm — all route to OSC
 
 _gt_detect_terminal() {
-  # Ptyxis (GNOME terminal on Fedora 42+) — VTE-based, full OSC support
-  if [[ -n "${PTYXIS_PID-}" ]]; then
-    echo "osc"; return
+  if [ -n "${PTYXIS_PID-}" ]; then
+    printf 'osc'; return
   fi
-  # foot (Wayland terminal)
-  if [[ "$TERM" == "foot" || "$TERM" == "foot-extra" ]]; then
-    echo "osc"; return
+  if [ "$TERM" = "foot" ] || [ "$TERM" = "foot-extra" ]; then
+    printf 'osc'; return
   fi
-  # wezterm
-  if [[ -n "${WEZTERM_EXECUTABLE-}" ]]; then
-    echo "osc"; return
+  if [ -n "${WEZTERM_EXECUTABLE-}" ]; then
+    printf 'osc'; return
   fi
-  # Konsole
-  if [[ -n "$KONSOLE_DBUS_SESSION" ]] || [[ -n "$KONSOLE_VERSION" ]]; then
-    echo "konsole"; return
+  if [ -n "${KONSOLE_DBUS_SESSION-}" ] || [ -n "${KONSOLE_VERSION-}" ]; then
+    printf 'konsole'; return
   fi
-  # Kitty
-  if [[ "$TERM" == "xterm-kitty" ]]; then
-    echo "kitty"; return
+  if [ "$TERM" = "xterm-kitty" ]; then
+    printf 'kitty'; return
   fi
-  # Alacritty
-  if [[ -n "$ALACRITTY_SOCKET" ]] || [[ -n "$ALACRITTY_LOG" ]]; then
-    echo "alacritty"; return
+  if [ -n "${ALACRITTY_SOCKET-}" ] || [ -n "${ALACRITTY_LOG-}" ]; then
+    printf 'alacritty'; return
   fi
-  # Fallback: OSC works on most modern terminals
-  echo "osc"
+  printf 'osc'
 }
 
 _gt_apply_terminal() {
@@ -471,12 +498,9 @@ _gt_apply_terminal() {
 # ─── Main entry point ───────────────────────────────────────────────
 
 _gt_apply() {
-  local palette_data="$1"
-  local git_root="$2"
-
-  _gt_parse_palette "$palette_data" || return 1
-
-  [[ -n "$git_root" ]] && _gt_apply_vscode "$git_root"
+  local _palette_data="$1" _git_root="$2"
+  _gt_parse_palette "$_palette_data" || return 1
+  [ -n "$_git_root" ] && _gt_apply_vscode "$_git_root"
   _gt_apply_terminal
 }
 
@@ -485,112 +509,136 @@ _gt_apply() {
 _gt_update_theme() {
   _gt_ensure_dir
 
-  local git_root
-  git_root=$(git rev-parse --show-toplevel 2>/dev/null) || return 0
+  local _git_root
+  _git_root=$(git rev-parse --show-toplevel 2>/dev/null) || return 0
 
-  local repo_id
-  repo_id=$(_gt_repo_id "$git_root")
-  [[ -z "$repo_id" ]] && return 0
+  local _repo_id
+  _repo_id=$(_gt_repo_id "$_git_root")
+  [ -z "$_repo_id" ] && return 0
 
-  [[ "$repo_id" == "$GIT_THEME_CURRENT" ]] && return 0
-  GIT_THEME_CURRENT="$repo_id"
+  [ "$_repo_id" = "$GIT_THEME_CURRENT" ] && return 0
+  GIT_THEME_CURRENT="$_repo_id"
 
-  local theme
-  theme=$(_gt_lookup "$repo_id")
+  local _theme
+  _theme=$(_gt_lookup "$_repo_id")
 
-  if [[ -z "$theme" ]]; then
-    local idx
-    idx=$(_gt_hash_to_index "$repo_id")
-    theme=$(echo "${GIT_THEME_PALETTES[$idx]}" | cut -d'|' -f1)
-    _gt_save "$repo_id" "$theme"
-    echo -e "\033[2m[git-theme] New repo → ${theme}\033[0m"
+  if [ -z "$_theme" ]; then
+    local _idx
+    _idx=$(_gt_hash_to_index "$_repo_id")
+    _theme=$(printf '%s\n' "$GIT_THEME_PALETTES" | sed -n "$(( _idx + 1 ))p" | cut -d'|' -f1)
+    _gt_save "$_repo_id" "$_theme"
+    printf '\033[2m[git-theme] New repo → %s\033[0m\n' "$_theme"
   fi
 
-  local palette_data
-  palette_data=$(_gt_get_palette "$theme") || return 0
-  _gt_apply "$palette_data" "$git_root"
+  local _palette_data
+  _palette_data=$(_gt_get_palette "$_theme") || return 0
+  _gt_apply "$_palette_data" "$_git_root"
 }
 
 # ─── User commands ───────────────────────────────────────────────────
+# Function uses underscore (POSIX-safe); alias provides hyphenated name
 
-git-theme() {
+git_theme() {
   case "${1:-}" in
     ls|list)
-      echo "Available palettes:"
-      for raw in "${GIT_THEME_PALETTES[@]}"; do
-        _gt_parse_palette "$raw" || continue
+      printf 'Available palettes:\n'
+      while IFS= read -r _raw; do
+        [ -z "$_raw" ] && continue
+        _gt_parse_palette "$_raw" || continue
+        _bg_r=$(printf '%s' "$_GT_P_bg" | cut -c1-2)
+        _bg_g=$(printf '%s' "$_GT_P_bg" | cut -c3-4)
+        _bg_b=$(printf '%s' "$_GT_P_bg" | cut -c5-6)
+        _fg_r=$(printf '%s' "$_GT_P_fg" | cut -c1-2)
+        _fg_g=$(printf '%s' "$_GT_P_fg" | cut -c3-4)
+        _fg_b=$(printf '%s' "$_GT_P_fg" | cut -c5-6)
         printf "  \033[48;2;%d;%d;%dm\033[38;2;%d;%d;%dm %-18s \033[0m\n" \
-          "0x${_GT_P[bg]:0:2}" "0x${_GT_P[bg]:2:2}" "0x${_GT_P[bg]:4:2}" \
-          "0x${_GT_P[fg]:0:2}" "0x${_GT_P[fg]:2:2}" "0x${_GT_P[fg]:4:2}" \
-          "${_GT_P[name]}"
-      done
+          "0x$_bg_r" "0x$_bg_g" "0x$_bg_b" \
+          "0x$_fg_r" "0x$_fg_g" "0x$_fg_b" \
+          "$_GT_P_name"
+done <<PALETTES
+$GIT_THEME_PALETTES
+PALETTES
       ;;
 
     set)
-      [[ -z "${2:-}" ]] && echo "Usage: git-theme set <palette>" && return 1
-      local git_root
-      git_root=$(git rev-parse --show-toplevel 2>/dev/null)
-      [[ -z "$git_root" ]] && echo "Not in a git repo" && return 1
-      _gt_get_palette "$2" >/dev/null || { echo "Unknown: $2. Run 'git-theme ls'"; return 1; }
-      local repo_id
-      repo_id=$(_gt_repo_id "$git_root")
-      _gt_save "$repo_id" "$2"
+      [ -z "${2:-}" ] && printf 'Usage: git-theme set <palette>\n' && return 1
+      local _git_root
+      _git_root=$(git rev-parse --show-toplevel 2>/dev/null)
+      [ -z "$_git_root" ] && printf 'Not in a git repo\n' && return 1
+      _gt_get_palette "$2" >/dev/null || { printf 'Unknown: %s. Run "git-theme ls"\n' "$2"; return 1; }
+      local _repo_id
+      _repo_id=$(_gt_repo_id "$_git_root")
+      _gt_save "$_repo_id" "$2"
       GIT_THEME_CURRENT=""
       _gt_update_theme
-      echo "Set $repo_id → $2"
+      printf 'Set %s → %s\n' "$_repo_id" "$2"
       ;;
 
     current)
-      local git_root
-      git_root=$(git rev-parse --show-toplevel 2>/dev/null)
-      [[ -z "$git_root" ]] && echo "Not in a git repo" && return 1
-      local repo_id
-      repo_id=$(_gt_repo_id "$git_root")
-      local theme
-      theme=$(_gt_lookup "$repo_id")
-      if [[ -n "$theme" ]]; then
-        echo "$repo_id → $theme"
+      local _git_root
+      _git_root=$(git rev-parse --show-toplevel 2>/dev/null)
+      [ -z "$_git_root" ] && printf 'Not in a git repo\n' && return 1
+      local _repo_id _theme
+      _repo_id=$(_gt_repo_id "$_git_root")
+      _theme=$(_gt_lookup "$_repo_id")
+      if [ -n "$_theme" ]; then
+        printf '%s → %s\n' "$_repo_id" "$_theme"
       else
-        echo "$repo_id → (no theme assigned)"
+        printf '%s → (no theme assigned)\n' "$_repo_id"
       fi
       ;;
 
     map)
-      [[ -s "$GIT_THEME_MAP" ]] && column -t -s'|' < "$GIT_THEME_MAP" || echo "No mappings yet."
+      if [ -s "$GIT_THEME_MAP" ]; then
+        if command -v column >/dev/null 2>&1; then
+          column -t -s'|' < "$GIT_THEME_MAP"
+        else
+          cat "$GIT_THEME_MAP"
+        fi
+      else
+        printf 'No mappings yet.\n'
+      fi
       ;;
 
     reset)
-      local git_root
-      git_root=$(git rev-parse --show-toplevel 2>/dev/null)
-      [[ -z "$git_root" ]] && echo "Not in a git repo" && return 1
-      local repo_id
-      repo_id=$(_gt_repo_id "$git_root")
-      sed -i "\#^${repo_id}|#d" "$GIT_THEME_MAP" 2>/dev/null
+      local _git_root
+      _git_root=$(git rev-parse --show-toplevel 2>/dev/null)
+      [ -z "$_git_root" ] && printf 'Not in a git repo\n' && return 1
+      local _repo_id
+      _repo_id=$(_gt_repo_id "$_git_root")
+      awk -F'|' -v id="$_repo_id" '$1 != id' "$GIT_THEME_MAP" > "${GIT_THEME_MAP}.tmp" && mv "${GIT_THEME_MAP}.tmp" "$GIT_THEME_MAP"
       GIT_THEME_CURRENT=""
-      echo "Reset theme for $repo_id"
+      printf 'Reset theme for %s\n' "$_repo_id"
       ;;
 
     preview)
-      echo "Previewing all palettes (3s each)..."
-      for raw in "${GIT_THEME_PALETTES[@]}"; do
-        _gt_parse_palette "$raw" || continue
-        echo -e "\n─── ${_GT_P[name]} ───"
+      printf 'Previewing all palettes (3s each)...\n'
+      while IFS= read -r _raw; do
+        [ -z "$_raw" ] && continue
+        _gt_parse_palette "$_raw" || continue
+        printf '\n─── %s ───\n' "$_GT_P_name"
         _gt_apply_terminal
         sleep 3
-      done
-      echo -e "\nDone. 'git-theme set <name>' to pick."
+done <<PALETTES
+$GIT_THEME_PALETTES
+PALETTES
+      printf '\nDone. Run "git-theme set <name>" to pick.\n'
       ;;
 
     off)
       printf '\033[0m\033]110\033\\\033]111\033\\'
-      for i in $(seq 0 15); do printf '\033]104;%d\033\\' "$i"; done
+      local _i=0
+      while [ "$_i" -le 15 ]; do
+        printf '\033]104;%d\033\\' "$_i"
+        _i=$(( _i + 1 ))
+      done
       _gt_clean_vscode
       GIT_THEME_CURRENT=""
-      echo "Colors reset."
+      printf 'Colors reset.\n'
       ;;
 
     *)
-      cat << 'USAGE'
+      cat <<'USAGE'
 git-theme — auto-assign terminal + VS Code palettes per git repo
 
 Commands:
@@ -610,34 +658,32 @@ USAGE
   esac
 }
 
+# Alias: allow both git-theme and git_theme
+alias git-theme='git_theme'
+
 # ─── Shell hooks ─────────────────────────────────────────────────────
-# Fix #1: starship_precmd_user_func instead of cd override
-# Fix #2: _GT_LAST_PWD cache to skip when PWD hasn't changed
+# Auto-switch only works in bash/zsh (sh has no prompt hook mechanism)
 
 _GT_LAST_PWD=""
 
 _gt_prompt_hook() {
-  [[ "$PWD" == "$_GT_LAST_PWD" ]] && return
+  [ "$PWD" = "$_GT_LAST_PWD" ] && return
   _GT_LAST_PWD="$PWD"
-  # Chain to previous precmd user func if one existed
-  [[ -n "${_GT_PREV_PRECMD_FUNC-}" ]] && "$_GT_PREV_PRECMD_FUNC"
+  [ -n "${_GT_PREV_PRECMD_FUNC-}" ] && "$_GT_PREV_PRECMD_FUNC"
   _gt_update_theme
 }
 
-if [[ -n "${ZSH_VERSION-}" ]]; then
+if [ -n "${ZSH_VERSION-}" ]; then
   autoload -Uz add-zsh-hook
   add-zsh-hook chpwd _gt_update_theme
-elif [[ -n "${BASH_VERSION-}" ]]; then
-  # Prefer starship_precmd_user_func if Starship is active
-  if [[ "$(type -t starship_precmd 2>/dev/null)" == "function" ]] || [[ "${STARSHIP_SHELL-}" == "bash" ]]; then
-    # Chain with any existing precmd user function
-    if [[ -n "${starship_precmd_user_func-}" && "$starship_precmd_user_func" != "_gt_prompt_hook" ]]; then
+elif [ -n "${BASH_VERSION-}" ]; then
+  if [ "$(type -t starship_precmd 2>/dev/null)" = "function" ] || [ "${STARSHIP_SHELL-}" = "bash" ]; then
+    if [ -n "${starship_precmd_user_func-}" ] && [ "$starship_precmd_user_func" != "_gt_prompt_hook" ]; then
       _GT_PREV_PRECMD_FUNC="$starship_precmd_user_func"
     fi
     starship_precmd_user_func="_gt_prompt_hook"
   else
-    # Fallback: append to PROMPT_COMMAND array
-    PROMPT_COMMAND+=("_gt_prompt_hook")
+    PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND;}_gt_prompt_hook"
   fi
 fi
 
