@@ -489,9 +489,59 @@ _gt_clean_vscode() {
   fi
 }
 
+# ─── Tmux adapter ──────────────────────────────────────────────────
+
+_gt_apply_tmux() {
+  # Window and pane background/foreground
+  tmux set -g window-style "bg=#$_GT_P_bg,fg=#$_GT_P_fg"
+  tmux set -g window-active-style "bg=#$_GT_P_bg,fg=#$_GT_P_fg"
+
+  # Status bar
+  local _status_bg
+  _status_bg=$(_gt_darken_hex "$_GT_P_bg" 20)
+  tmux set -g status-style "bg=#$_status_bg,fg=#$_GT_P_fg"
+  tmux set -g status-left-style "bg=#$_GT_P_blue,fg=#$_GT_P_bg,bold"
+  tmux set -g status-right-style "bg=#$_status_bg,fg=#$_GT_P_br_black"
+
+  # Active/inactive window tabs
+  tmux set -g window-status-current-style "bg=#$_GT_P_bg,fg=#$_GT_P_blue,bold"
+  tmux set -g window-status-style "bg=#$_status_bg,fg=#$_GT_P_br_black"
+
+  # Pane borders
+  tmux set -g pane-border-style "fg=#$_GT_P_br_black"
+  tmux set -g pane-active-border-style "fg=#$_GT_P_blue"
+
+  # Message and command prompt
+  tmux set -g message-style "bg=#$_GT_P_yellow,fg=#$_GT_P_bg"
+  tmux set -g message-command-style "bg=#$_GT_P_bg,fg=#$_GT_P_yellow"
+
+  # Pass full OSC palette through to the host terminal (iTerm2, etc.)
+  printf '\033Ptmux;\033\033]11;#%s\033\033\\\033\\' "$_GT_P_bg"
+  printf '\033Ptmux;\033\033]10;#%s\033\033\\\033\\' "$_GT_P_fg"
+  printf '\033Ptmux;\033\033]4;0;#%s\033\033\\\033\\' "$_GT_P_black"
+  printf '\033Ptmux;\033\033]4;1;#%s\033\033\\\033\\' "$_GT_P_red"
+  printf '\033Ptmux;\033\033]4;2;#%s\033\033\\\033\\' "$_GT_P_green"
+  printf '\033Ptmux;\033\033]4;3;#%s\033\033\\\033\\' "$_GT_P_yellow"
+  printf '\033Ptmux;\033\033]4;4;#%s\033\033\\\033\\' "$_GT_P_blue"
+  printf '\033Ptmux;\033\033]4;5;#%s\033\033\\\033\\' "$_GT_P_magenta"
+  printf '\033Ptmux;\033\033]4;6;#%s\033\033\\\033\\' "$_GT_P_cyan"
+  printf '\033Ptmux;\033\033]4;7;#%s\033\033\\\033\\' "$_GT_P_white"
+  printf '\033Ptmux;\033\033]4;8;#%s\033\033\\\033\\' "$_GT_P_br_black"
+  printf '\033Ptmux;\033\033]4;9;#%s\033\033\\\033\\' "$_GT_P_br_red"
+  printf '\033Ptmux;\033\033]4;10;#%s\033\033\\\033\\' "$_GT_P_br_green"
+  printf '\033Ptmux;\033\033]4;11;#%s\033\033\\\033\\' "$_GT_P_br_yellow"
+  printf '\033Ptmux;\033\033]4;12;#%s\033\033\\\033\\' "$_GT_P_br_blue"
+  printf '\033Ptmux;\033\033]4;13;#%s\033\033\\\033\\' "$_GT_P_br_magenta"
+  printf '\033Ptmux;\033\033]4;14;#%s\033\033\\\033\\' "$_GT_P_br_cyan"
+  printf '\033Ptmux;\033\033]4;15;#%s\033\033\\\033\\' "$_GT_P_br_white"
+}
+
 # ─── Terminal detection and dispatch ─────────────────────────────────
 
 _gt_detect_terminal() {
+  if [ -n "${TMUX-}" ]; then
+    printf 'tmux'; return
+  fi
   if [ -n "${PTYXIS_PID-}" ]; then
     printf 'osc'; return
   fi
@@ -519,6 +569,7 @@ _gt_detect_terminal() {
 
 _gt_apply_terminal() {
   case "$(_gt_detect_terminal)" in
+    tmux)      _gt_apply_tmux ;;
     iterm2)    _gt_apply_iterm2 ;;
     konsole)   _gt_apply_konsole ;;
     kitty)     _gt_apply_kitty ;;
