@@ -18,18 +18,18 @@ GIT_THEME_MAX_USES="${GIT_THEME_MAX_USES:-2}"
 # ─── Palettes ────────────────────────────────────────────────────────
 # Format: name|bg|fg|black|red|green|yellow|blue|magenta|cyan|white
 #          |br_black|br_red|br_green|br_yellow|br_blue|br_magenta|br_cyan|br_white
-GIT_THEME_PALETTES="mocha|1e1e2e|cdd6f4|45475a|f38ba8|a6e3a1|f9e2af|89b4fa|cba6f7|94e2d5|bac2de|a0a3b4|f38ba8|a6e3a1|f9e2af|89b4fa|cba6f7|94e2d5|a6adc8
-ayu-mirage|1f2430|cbccc6|3c4653|f28779|d5ff80|ffd173|73d0ff|dfbfff|95e6cb|cbccc6|a3a9b5|ffa759|bae67e|ffcc66|5ccfe6|d4bfff|95e6cb|ffffff
+GIT_THEME_PALETTES="mocha|1e1e2e|eef1fb|45475a|f38ba8|a6e3a1|f9e2af|89b4fa|cba6f7|94e2d5|bac2de|a0a3b4|f38ba8|a6e3a1|f9e2af|89b4fa|cba6f7|94e2d5|a6adc8
+ayu-mirage|1f2430|f5f5f4|3c4653|f28779|d5ff80|ffd173|73d0ff|dfbfff|95e6cb|cbccc6|a3a9b5|ffa759|bae67e|ffcc66|5ccfe6|d4bfff|95e6cb|ffffff
 monokai|272822|f8f8f2|49483e|fa4d8b|a6e22e|f4bf75|66d9ef|ae81ff|a1efe4|f8f8f2|afac9c|fa4d8b|a6e22e|e6db74|66d9ef|ae81ff|a1efe4|f9f8f5
-rosepine|191724|e0def4|3d3b4f|eb6f92|3b8bab|f6c177|9ccfd8|c4a7e7|ebbcba|e0def4|9e9bb1|eb6f92|3b8bab|f6c177|9ccfd8|c4a7e7|ebbcba|e0def4
+rosepine|191724|eeedf9|3d3b4f|eb6f92|3b8bab|f6c177|9ccfd8|c4a7e7|ebbcba|e0def4|9e9bb1|eb6f92|3b8bab|f6c177|9ccfd8|c4a7e7|ebbcba|e0def4
 oxocarbon|161616|f2f4f8|3b3b3b|ff7eb6|42be65|ee5396|33b1ff|be95ff|3ddbd9|dde1e6|9b9b9b|ff7eb6|42be65|ee5396|33b1ff|be95ff|3ddbd9|ffffff
-tokyonight|1a1b26|c0caf5|414868|f7768e|9ece6a|e0af68|7aa2f7|bb9af7|7dcfff|a9b1d6|989fbe|ff7a93|b9f27c|ff9e64|7da6ff|bb9af7|0db9d7|c0caf5
-kanagawa|1f1f28|dcd7ba|41414d|d0696b|76946a|c0a36e|7e9cd8|957fb8|6a9589|c8c093|a8a3a0|ec5252|98bb6c|e6c384|7fb4ca|a292a3|7aa89f|d5cea3
-gruvbox|282828|ebdbb2|4b4746|fb5744|98971a|d79921|519b9f|be7c9b|689d6a|a89984|b3aba6|fb5744|b8bb26|fabd2f|83a598|d3869b|8ec07c|bdae93
-everforest|2d353b|d3c6aa|475258|e67f81|a7c080|dbbc7f|7fbbb3|d699b6|83c092|9da9a0|b7bdb6|e67f81|a7c080|dbbc7f|7fbbb3|d699b6|83c092|bdc3af
-nord|2e3440|eceff4|4c5361|d08a91|a3be8c|ebcb8b|81a1c1|b692af|88c0d0|e5e9f0|b3bcc9|d08a91|a3be8c|ebcb8b|81a1c1|b692af|8fbcbb|eceff4
-dracula|282a36|f8f8f2|44475a|ff5858|50fa7b|f1fa8c|8592b8|bd93f9|8be9fd|f8f8f2|a5afcb|ff6e6e|69ff94|ffffa5|d6acff|ff92df|a4ffff|ffffff
-solarized|002b36|99a7a8|244e58|e56764|859900|b58900|3395da|8589ce|2aa198|93a1a1|9bafb5|e86731|859900|b58900|3395da|8589ce|2aa198|eee8d5"
+tokyonight|1a1b26|eceffc|414868|f7768e|9ece6a|e0af68|7aa2f7|bb9af7|7dcfff|a9b1d6|989fbe|ff7a93|b9f27c|ff9e64|7da6ff|bb9af7|0db9d7|c0caf5
+kanagawa|1f1f28|f2f1e6|41414d|d0696b|76946a|c0a36e|7e9cd8|957fb8|6a9589|c8c093|a8a3a0|ec5252|98bb6c|e6c384|7fb4ca|a292a3|7aa89f|d5cea3
+gruvbox|282828|fbf7ef|4b4746|fb5744|98971a|d79921|519b9f|be7c9b|689d6a|a89984|b3aba6|fb5744|b8bb26|fabd2f|83a598|d3869b|8ec07c|bdae93
+everforest|293035|ffffff|475258|e67f81|a7c080|dbbc7f|7fbbb3|d699b6|83c092|9da9a0|b7bdb6|e67f81|a7c080|dbbc7f|7fbbb3|d699b6|83c092|bdc3af
+nord|282d37|ffffff|4c5361|d08a91|a3be8c|ebcb8b|81a1c1|b692af|88c0d0|e5e9f0|b3bcc9|d08a91|a3be8c|ebcb8b|81a1c1|b692af|8fbcbb|eceff4
+dracula|282a36|fcfcf9|44475a|ff5858|50fa7b|f1fa8c|8592b8|bd93f9|8be9fd|f8f8f2|a5afcb|ff6e6e|69ff94|ffffa5|d6acff|ff92df|a4ffff|ffffff
+solarized|002b36|fcfcfd|244e58|e56764|859900|b58900|3395da|8589ce|2aa198|93a1a1|9bafb5|e86731|859900|b58900|3395da|8589ce|2aa198|eee8d5"
 
 PALETTE_COUNT=12
 
