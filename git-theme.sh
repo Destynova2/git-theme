@@ -12,21 +12,24 @@ GIT_THEME_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/git-theme"
 GIT_THEME_MAP="$GIT_THEME_DIR/map"
 GIT_THEME_CURRENT=""
 
+# Max repos that can share the same auto-assigned palette before we look elsewhere
+GIT_THEME_MAX_USES="${GIT_THEME_MAX_USES:-2}"
+
 # ─── Palettes ────────────────────────────────────────────────────────
 # Format: name|bg|fg|black|red|green|yellow|blue|magenta|cyan|white
 #          |br_black|br_red|br_green|br_yellow|br_blue|br_magenta|br_cyan|br_white
-GIT_THEME_PALETTES="mocha|1e1e2e|cdd6f4|45475a|f38ba8|a6e3a1|f9e2af|89b4fa|cba6f7|94e2d5|bac2de|585b70|f38ba8|a6e3a1|f9e2af|89b4fa|cba6f7|94e2d5|a6adc8
-macchiato|24273a|cad3f5|494d64|ed8796|a6da95|eed49f|8aadf4|c6a0f6|8bd5ca|b8c0e0|5b6078|ed8796|a6da95|eed49f|8aadf4|c6a0f6|8bd5ca|a5adcb
-frappe|303446|c6d0f5|51576d|e78284|a6d189|e5c890|8caaee|ca9ee6|81c8be|b5bfe2|626880|e78284|a6d189|e5c890|8caaee|ca9ee6|81c8be|a5adce
-rosepine|191724|e0def4|26233a|eb6f92|31748f|f6c177|9ccfd8|c4a7e7|ebbcba|e0def4|6e6a86|eb6f92|31748f|f6c177|9ccfd8|c4a7e7|ebbcba|e0def4
-rosepine-moon|232136|e0def4|2a273f|eb6f92|3e8fb0|f6c177|9ccfd8|c4a7e7|ea9a97|e0def4|6e6a86|eb6f92|3e8fb0|f6c177|9ccfd8|c4a7e7|ea9a97|e0def4
-tokyonight|1a1b26|c0caf5|414868|f7768e|9ece6a|e0af68|7aa2f7|bb9af7|7dcfff|a9b1d6|565f89|ff7a93|b9f27c|ff9e64|7da6ff|bb9af7|0db9d7|c0caf5
-kanagawa|1f1f28|dcd7ba|2a2a37|c34043|76946a|c0a36e|7e9cd8|957fb8|6a9589|c8c093|625e5a|e82424|98bb6c|e6c384|7fb4ca|a292a3|7aa89f|d5cea3
-gruvbox|282828|ebdbb2|3c3836|cc241d|98971a|d79921|458588|b16286|689d6a|a89984|504945|fb4934|b8bb26|fabd2f|83a598|d3869b|8ec07c|bdae93
-everforest|2d353b|d3c6aa|475258|e67e80|a7c080|dbbc7f|7fbbb3|d699b6|83c092|9da9a0|374145|e67e80|a7c080|dbbc7f|7fbbb3|d699b6|83c092|bdc3af
-nord|2e3440|eceff4|3b4252|bf616a|a3be8c|ebcb8b|81a1c1|b48ead|88c0d0|e5e9f0|4c566a|bf616a|a3be8c|ebcb8b|81a1c1|b48ead|8fbcbb|eceff4
-dracula|282a36|f8f8f2|44475a|ff5555|50fa7b|f1fa8c|6272a4|bd93f9|8be9fd|f8f8f2|6272a4|ff6e6e|69ff94|ffffa5|d6acff|ff92df|a4ffff|ffffff
-solarized|002b36|839496|073642|dc322f|859900|b58900|268bd2|6c71c4|2aa198|93a1a1|586e75|cb4b16|859900|b58900|268bd2|6c71c4|2aa198|eee8d5"
+GIT_THEME_PALETTES="mocha|1e1e2e|cdd6f4|45475a|f38ba8|a6e3a1|f9e2af|89b4fa|cba6f7|94e2d5|bac2de|a0a3b4|f38ba8|a6e3a1|f9e2af|89b4fa|cba6f7|94e2d5|a6adc8
+ayu-mirage|1f2430|cbccc6|3c4653|f28779|d5ff80|ffd173|73d0ff|dfbfff|95e6cb|cbccc6|a3a9b5|ffa759|bae67e|ffcc66|5ccfe6|d4bfff|95e6cb|ffffff
+monokai|272822|f8f8f2|49483e|fa4d8b|a6e22e|f4bf75|66d9ef|ae81ff|a1efe4|f8f8f2|afac9c|fa4d8b|a6e22e|e6db74|66d9ef|ae81ff|a1efe4|f9f8f5
+rosepine|191724|e0def4|3d3b4f|eb6f92|3b8bab|f6c177|9ccfd8|c4a7e7|ebbcba|e0def4|9e9bb1|eb6f92|3b8bab|f6c177|9ccfd8|c4a7e7|ebbcba|e0def4
+oxocarbon|161616|f2f4f8|3b3b3b|ff7eb6|42be65|ee5396|33b1ff|be95ff|3ddbd9|dde1e6|9b9b9b|ff7eb6|42be65|ee5396|33b1ff|be95ff|3ddbd9|ffffff
+tokyonight|1a1b26|c0caf5|414868|f7768e|9ece6a|e0af68|7aa2f7|bb9af7|7dcfff|a9b1d6|989fbe|ff7a93|b9f27c|ff9e64|7da6ff|bb9af7|0db9d7|c0caf5
+kanagawa|1f1f28|dcd7ba|41414d|d0696b|76946a|c0a36e|7e9cd8|957fb8|6a9589|c8c093|a8a3a0|ec5252|98bb6c|e6c384|7fb4ca|a292a3|7aa89f|d5cea3
+gruvbox|282828|ebdbb2|4b4746|fb5744|98971a|d79921|519b9f|be7c9b|689d6a|a89984|b3aba6|fb5744|b8bb26|fabd2f|83a598|d3869b|8ec07c|bdae93
+everforest|2d353b|d3c6aa|475258|e67f81|a7c080|dbbc7f|7fbbb3|d699b6|83c092|9da9a0|b7bdb6|e67f81|a7c080|dbbc7f|7fbbb3|d699b6|83c092|bdc3af
+nord|2e3440|eceff4|4c5361|d08a91|a3be8c|ebcb8b|81a1c1|b692af|88c0d0|e5e9f0|b3bcc9|d08a91|a3be8c|ebcb8b|81a1c1|b692af|8fbcbb|eceff4
+dracula|282a36|f8f8f2|44475a|ff5858|50fa7b|f1fa8c|8592b8|bd93f9|8be9fd|f8f8f2|a5afcb|ff6e6e|69ff94|ffffa5|d6acff|ff92df|a4ffff|ffffff
+solarized|002b36|99a7a8|244e58|e56764|859900|b58900|3395da|8589ce|2aa198|93a1a1|9bafb5|e86731|859900|b58900|3395da|8589ce|2aa198|eee8d5"
 
 PALETTE_COUNT=12
 
@@ -162,6 +165,38 @@ _gt_get_palette() {
     return 0
   fi
   return 1
+}
+
+_gt_count_theme_uses() {
+  awk -F'|' -v t="$1" '$2 == t { n++ } END { print n+0 }' "$GIT_THEME_MAP" 2>/dev/null
+}
+
+# Pick a palette for a repo, walking forward from the hash-derived index.
+# Skip any palette already used >= GIT_THEME_MAX_USES times, and any name
+# passed as $2 (used by `roll` to force a change). Falls back to the
+# least-used palette if every option is saturated.
+_gt_pick_theme() {
+  local _repo_id="$1" _exclude="${2-}"
+  local _start _i _idx _name _uses _best="" _best_uses=999
+  _start=$(_gt_hash_to_index "$_repo_id")
+  _i=0
+  while [ "$_i" -lt "$PALETTE_COUNT" ]; do
+    _idx=$(( (_start + _i) % PALETTE_COUNT ))
+    _name=$(printf '%s\n' "$GIT_THEME_PALETTES" | sed -n "$(( _idx + 1 ))p" | cut -d'|' -f1)
+    if [ "$_name" != "$_exclude" ]; then
+      _uses=$(_gt_count_theme_uses "$_name")
+      if [ "$_uses" -lt "$GIT_THEME_MAX_USES" ]; then
+        printf '%s' "$_name"
+        return 0
+      fi
+      if [ "$_uses" -lt "$_best_uses" ]; then
+        _best="$_name"
+        _best_uses="$_uses"
+      fi
+    fi
+    _i=$(( _i + 1 ))
+  done
+  printf '%s' "$_best"
 }
 
 # ─── JSON merge utility ─────────────────────────────────────────────
@@ -606,9 +641,7 @@ _gt_update_theme() {
   _theme=$(_gt_lookup "$_repo_id")
 
   if [ -z "$_theme" ]; then
-    local _idx
-    _idx=$(_gt_hash_to_index "$_repo_id")
-    _theme=$(printf '%s\n' "$GIT_THEME_PALETTES" | sed -n "$(( _idx + 1 ))p" | cut -d'|' -f1)
+    _theme=$(_gt_pick_theme "$_repo_id")
     _gt_save "$_repo_id" "$_theme"
     printf '\033[2m[git-theme] New repo → %s\033[0m\n' "$_theme"
   fi
@@ -694,6 +727,34 @@ PALETTES
       printf 'Reset theme for %s\n' "$_repo_id"
       ;;
 
+    roll)
+      local _git_root
+      _git_root=$(git rev-parse --show-toplevel 2>/dev/null)
+      [ -z "$_git_root" ] && printf 'Not in a git repo\n' && return 1
+      _gt_ensure_dir
+      local _repo_id _current _new
+      _repo_id=$(_gt_repo_id "$_git_root")
+      _current=$(_gt_lookup "$_repo_id")
+      # Drop existing mapping so it doesn't count toward usage
+      if [ -n "$_current" ]; then
+        awk -F'|' -v id="$_repo_id" '$1 != id' "$GIT_THEME_MAP" > "${GIT_THEME_MAP}.tmp" && mv "${GIT_THEME_MAP}.tmp" "$GIT_THEME_MAP"
+      fi
+      _new=$(_gt_pick_theme "$_repo_id" "$_current")
+      if [ -z "$_new" ]; then
+        printf 'No alternative palette available\n'
+        [ -n "$_current" ] && _gt_save "$_repo_id" "$_current"
+        return 1
+      fi
+      _gt_save "$_repo_id" "$_new"
+      GIT_THEME_CURRENT=""
+      _gt_update_theme
+      if [ -n "$_current" ]; then
+        printf 'Rolled %s: %s → %s\n' "$_repo_id" "$_current" "$_new"
+      else
+        printf 'Set %s → %s\n' "$_repo_id" "$_new"
+      fi
+      ;;
+
     preview)
       printf 'Previewing all palettes (3s each)...\n'
       while IFS= read -r _raw; do
@@ -729,9 +790,13 @@ Commands:
   set <name>   Assign a palette to the current repo
   current      Show the theme for the current repo
   map          Show all repo → palette assignments
+  roll         Re-roll: switch to a different (least-used) palette
   reset        Remove assignment for current repo
   preview      Cycle through all palettes (3s each)
   off          Reset terminal + VS Code to default colors
+
+Auto-assignment skips palettes already used GIT_THEME_MAX_USES times
+(default: 2). Override via env var.
 
 Terminal: Konsole, Alacritty, Kitty, Ptyxis, foot, wezterm, + any OSC-compatible
 VS Code:  auto-updates .vscode/settings.json (excluded from git)
