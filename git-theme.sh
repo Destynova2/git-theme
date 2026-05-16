@@ -141,6 +141,50 @@ _gt_blend_hex() {
   printf '%02x%02x%02x' "$_r" "$_g" "$_b"
 }
 
+# WCAG 2.x contrast ratio between two hex colors, returned scaled x100
+# (e.g. "725" = 7.25:1). Inlined sRGB→linear → luminance to stay within a
+# single awk BEGIN block — macOS BWK awk rejects user-defined functions there.
+_gt_wcag_ratio_x100() {
+  awk -v a="$1" -v b="$2" 'BEGIN {
+    n = "0123456789abcdef"
+    for (i = 0; i < 16; i++) h[substr(n, i+1, 1)] = i
+    al = tolower(a); bl = tolower(b)
+    for (k = 0; k < 2; k++) {
+      s = (k == 0) ? al : bl
+      L = 0
+      for (j = 0; j < 3; j++) {
+        v = (h[substr(s, j*2+1, 1)] * 16 + h[substr(s, j*2+2, 1)]) / 255
+        v = (v <= 0.03928) ? v/12.92 : ((v+0.055)/1.055)^2.4
+        w = (j == 0) ? 0.2126 : (j == 1) ? 0.7152 : 0.0722
+        L += w * v
+      }
+      lum[k] = L
+    }
+    L1 = (lum[0] > lum[1]) ? lum[0] : lum[1]
+    L2 = (lum[0] > lum[1]) ? lum[1] : lum[0]
+    printf "%d", int((L1 + 0.05) / (L2 + 0.05) * 100 + 0.5)
+  }'
+}
+
+# Walk a blend from $1 toward $2 in 5% steps (starting at $5, default 50%)
+# until the resulting color hits contrast ratio $4/100 against $3. Returns the
+# first qualifying hex, or $2 unchanged if even 100% doesn't satisfy the target.
+_gt_blend_for_contrast() {
+  local _start="$1" _end="$2" _bg="$3" _target_x100="$4" _min_pct="${5:-50}"
+  local _pct _candidate _ratio
+  _pct="$_min_pct"
+  while [ "$_pct" -le 100 ]; do
+    _candidate=$(_gt_blend_hex "$_start" "$_end" "$_pct")
+    _ratio=$(_gt_wcag_ratio_x100 "$_candidate" "$_bg")
+    if [ "$_ratio" -ge "$_target_x100" ]; then
+      printf '%s' "$_candidate"
+      return 0
+    fi
+    _pct=$(( _pct + 5 ))
+  done
+  printf '%s' "$_end"
+}
+
 # ─── Core functions ──────────────────────────────────────────────────
 
 _gt_ensure_dir() {
@@ -773,10 +817,11 @@ _gt_build_claude_code_json() {
     *)       _base="dark";  _diff_blend=35; _diff_dim_blend=20 ;;
   esac
 
-  # Push subtle/inactive grays halfway from br_black toward fg. The palette's
-  # br_black hits ~4.5:1 on light bg — at the WCAG AA floor for body text,
-  # which renders the model badge and code punctuation as "too pale".
-  _subtle=$(_gt_blend_hex "$_GT_P_br_black" "$_GT_P_fg" 50)
+  # AAA-guaranteed subtle: walk from br_black toward fg until ratio ≥ 7.0:1
+  # against bg. Starts at the historical 50% blend so palettes that already
+  # cleared AAA there keep their exact rendering; only the marginal ones
+  # (mocha/ayu/rosepine/tokyonight/kanagawa/everforest -light) get nudged up.
+  _subtle=$(_gt_blend_for_contrast "$_GT_P_br_black" "$_GT_P_fg" "$_GT_P_bg" 700 50)
 
   _diff_added=$(_gt_blend_hex "$_GT_P_bg" "$_GT_P_green" "$_diff_blend")
   _diff_removed=$(_gt_blend_hex "$_GT_P_bg" "$_GT_P_red" "$_diff_blend")
